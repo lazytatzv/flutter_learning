@@ -2,7 +2,7 @@
 FROM archlinux:latest
 
 RUN pacman -Syu --noconfirm \
-    fish git vim less tmux unzip which sudo \
+    fish git vim less tmux unzip which sudo cmake ninja clang pkg-config gtk3 \
     && pacman -Scc --noconfirm
 
 RUN echo "tatzv ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
