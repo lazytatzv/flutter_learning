@@ -13,4 +13,6 @@ services:
     environment:
       - DISPLAY=${DISPLAY}
 
+# X11転送をするとき以下をホスト側で実行
+# xhost +local:docker
 
