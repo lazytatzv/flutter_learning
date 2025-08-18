@@ -1,8 +1,10 @@
 services:
   flutter:
-    image: cirrusci/flutter:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     volumes:
-      - .:/app
+      - ./src:/app
       - /tmp/.X11-unix:/tmp/.X11-unix # X11転送
 
     working_dir: /app
@@ -11,4 +13,4 @@ services:
     environment:
       - DISPLAY=${DISPLAY}
 
-      
+
