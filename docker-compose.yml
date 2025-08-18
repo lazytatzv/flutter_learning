@@ -1,0 +1,14 @@
+services:
+  flutter:
+    image: cirrusci/flutter:latest
+    volumes:
+      - .:/app
+      - /tmp/.X11-unix:/tmp/.X11-unix # X11転送
+
+    working_dir: /app
+    stdin_open: true
+    tty: true
+    environment:
+      - DISPLAY=${DISPLAY}
+
+      
