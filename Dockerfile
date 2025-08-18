@@ -1,15 +1,26 @@
-FROM cirrusci/flutter:latest
+# Arch ベース
+FROM archlinux:latest
 
-# 色々と欲しいものをインストール
-RUN apt-get update && apt-get install -y \
-    fish \
-    git \
-    vim \
-    less \
-    tmux \
-    && rm -rf /var/lib/apt/lists/*
+RUN pacman -Syu --noconfirm \
+    fish git vim less tmux unzip which sudo \
+    && pacman -Scc --noconfirm
 
-# 作業ディレクトリ
+RUN echo "tatzv ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+# ユーザー作成
+RUN useradd -ms /usr/bin/fish tatzv
+USER tatzv
 WORKDIR /app
+
+# Flutter SDK をユーザー権限で clone
+RUN git clone https://github.com/flutter/flutter.git /home/tatzv/flutter
+ENV PATH="/home/tatzv/flutter/bin:/home/tatzv/flutter/bin/cache/dart-sdk/bin:$PATH"
+
+# stable チャンネル & upgrade
+RUN flutter channel stable
+RUN flutter upgrade
+
+# 動作確認
+RUN flutter doctor
 
 CMD ["fish"]
