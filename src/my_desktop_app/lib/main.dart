@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 void main() {
@@ -11,7 +13,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'My Linux Flutter App',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -28,9 +31,9 @@ class MyApp extends StatelessWidget {
         //
         // This works for code too, not just values: Most code changes can be
         // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Demo'),
     );
   }
 }
@@ -54,7 +57,41 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final Random _rand = Random();
+  final TextEditingController _ctrl = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+
   int _counter = 0;
+  int _score = 0; // スコアを記憶
+  late String _targetLetter; // 対象の文字（1文字）
+
+  @override
+  void initState() {
+    super.initState();
+    _targetLetter = String.fromCharCode(65 + _rand.nextInt(26));
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+  _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _checkInput(String input) {
+    if (input.isEmpty) return;
+    final char = input.toUpperCase().trim()[0];
+    if (char == _targetLetter) {
+      setState(() {
+        _score++;
+        _targetLetter = String.fromCharCode(65 + _rand.nextInt(26));
+      });
+      // clear so the same input won't be sent again
+  _ctrl.clear();
+  // put focus back so user can type next letter immediately
+  _focusNode.requestFocus();
+    }
+  }
 
   void _incrementCounter() {
     setState(() {
@@ -104,10 +141,25 @@ class _MyHomePageState extends State<MyHomePage> {
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text('You have pushed the button this many times:'),
+            const Text('Type the letter shown:'),
             Text(
-              '$_counter',
+              '$_targetLetter',
               style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: TextField(
+                controller: _ctrl,
+                focusNode: _focusNode,
+                onChanged: _checkInput,
+                autofocus: true,
+                maxLength: 1,
+                textCapitalization: TextCapitalization.characters,
+              ),
+            ),
+            Text(
+              'Score: $_score',
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
           ],
         ),
