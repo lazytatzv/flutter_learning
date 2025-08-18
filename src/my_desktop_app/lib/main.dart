@@ -60,15 +60,25 @@ class _MyHomePageState extends State<MyHomePage> {
   final Random _rand = Random();
   final TextEditingController _ctrl = TextEditingController();
   final FocusNode _focusNode = FocusNode();
-
   int _counter = 0;
   int _score = 0; // スコアを記憶
-  late String _targetLetter; // 対象の文字（1文字）
+  // simple word list for the typing game
+  final List<String> _wordList = [
+    'apple', 'banana', 'cherry', 'dog', 'elephant', 'flutter', 'widget', 'state', 'async', 'future',
+    'keyboard', 'monitor', 'window', 'linux', 'desktop', 'random', 'function', 'variable'
+  ];
+
+  late String _targetWord; // 対象の単語
+  String _currentInput = '';
 
   @override
   void initState() {
     super.initState();
-    _targetLetter = String.fromCharCode(65 + _rand.nextInt(26));
+  _targetWord = _wordList[_rand.nextInt(_wordList.length)];
+    // Ensure the hidden text field receives keyboard focus after build.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _focusNode.requestFocus();
+    });
   }
 
   @override
@@ -78,18 +88,38 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
+  // Check the submitted input as a whole word (case-insensitive)
   void _checkInput(String input) {
-    if (input.isEmpty) return;
-    final char = input.toUpperCase().trim()[0];
-    if (char == _targetLetter) {
+    final submitted = input.trim();
+    if (submitted.isEmpty) return;
+    if (submitted.toLowerCase() == _targetWord.toLowerCase()) {
       setState(() {
         _score++;
-        _targetLetter = String.fromCharCode(65 + _rand.nextInt(26));
+        _targetWord = _wordList[_rand.nextInt(_wordList.length)];
+        _currentInput = '';
       });
-      // clear so the same input won't be sent again
-  _ctrl.clear();
-  // put focus back so user can type next letter immediately
-  _focusNode.requestFocus();
+      _ctrl.clear();
+      _focusNode.requestFocus();
+    }
+  }
+
+  void _handleCorrect() {
+    setState(() {
+      _score++;
+      _targetWord = _wordList[_rand.nextInt(_wordList.length)];
+      _currentInput = '';
+    });
+    _ctrl.clear();
+    _focusNode.requestFocus();
+  }
+
+  void _onInputChanged(String s) {
+    setState(() {
+      _currentInput = s;
+    });
+    if (s.trim().isNotEmpty && s.trim().toLowerCase() == _targetWord.toLowerCase()) {
+      // auto-advance on full match
+      _handleCorrect();
     }
   }
 
@@ -113,16 +143,22 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
+  appBar: AppBar(
         // TRY THIS: Try changing the color here to a specific color (to
         // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
         // change color while the other colors stay the same.
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: Text(
+          widget.title,
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontSize: 22),
+        ),
       ),
-      body: Center(
+      body: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => _focusNode.requestFocus(),
+        child: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child: Column(
@@ -141,29 +177,76 @@ class _MyHomePageState extends State<MyHomePage> {
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text('Type the letter shown:'),
-            Text(
-              '$_targetLetter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
+            const Text('Type the word shown:'),
+            const SizedBox(height: 8),
+            // Show target with real-time match highlighting (larger)
+            Builder(builder: (context) {
+              final baseStyle = Theme.of(context).textTheme.headlineLarge?.copyWith(fontSize: 64) ?? const TextStyle(fontSize: 64);
+              return RichText(
+                text: TextSpan(
+                  children: _targetWord.split('').asMap().entries.map((e) {
+                    final i = e.key;
+                    final ch = e.value;
+                    final input = _currentInput;
+                    TextStyle style = baseStyle;
+                    if (i < input.length) {
+                      final inCh = input[i];
+                      if (inCh.toLowerCase() == ch.toLowerCase()) {
+                        style = style.copyWith(color: Colors.green);
+                      } else {
+                        style = style.copyWith(color: Colors.red);
+                      }
+                    }
+                    return TextSpan(text: ch, style: style);
+                  }).toList(),
+                ),
+                textAlign: TextAlign.center,
+              );
+            }),
             Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: TextField(
-                controller: _ctrl,
-                focusNode: _focusNode,
-                onChanged: _checkInput,
-                autofocus: true,
-                maxLength: 1,
-                textCapitalization: TextCapitalization.characters,
+              padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
+              child: Center(
+                child: SizedBox(
+                  width: 900, // keep a readable width on desktop (larger)
+                  child: Opacity(
+                    opacity: 0.0,
+                    child: SizedBox(
+                      width: 1,
+                      child: TextField(
+                        controller: _ctrl,
+                        focusNode: _focusNode,
+                        onSubmitted: _checkInput,
+                        onChanged: _onInputChanged,
+                        autofocus: true,
+                        textCapitalization: TextCapitalization.none,
+                        textAlign: TextAlign.center,
+                        textInputAction: TextInputAction.done,
+                        style: const TextStyle(fontSize: 18, color: Colors.transparent),
+                        cursorColor: Colors.blue,
+                        enableSuggestions: false,
+                        autocorrect: false,
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding: EdgeInsets.zero,
+                          counterText: '', // hide length counter
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
+
+            // current input is shown inside the TextField via its controller
             Text(
               'Score: $_score',
-              style: Theme.of(context).textTheme.headlineSmall,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontSize: 28),
             ),
           ],
         ),
       ),
+    ),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         tooltip: 'Increment',
