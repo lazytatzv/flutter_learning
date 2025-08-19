@@ -2,7 +2,20 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+void main() {
+  // 自己署名証明書でも接続できるようにオーバーライド
+  HttpOverrides.global = MyHttpOverrides();
+  runApp(const MyApp());
+}
+
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
+  }
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -34,7 +47,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _connectToRos() async {
     try {
-      final ws = await WebSocket.connect('ws://100.109.100.122:9090');
+      // WSS でポート443に接続（Nginx経由）
+      final ws = await WebSocket.connect('wss://100.109.100.122/');
+      
+      // /chatter トピックにサブスクライブ
       ws.add(jsonEncode({
         "op": "subscribe",
         "topic": "/chatter",
@@ -44,7 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ws.listen((data) {
         final msg = jsonDecode(data);
         setState(() {
-          _rosMessage = msg['msg']['data'] ?? 'No data';
+          _rosMessage = msg['msg']?['data'] ?? 'No data';
         });
       });
     } catch (e) {
