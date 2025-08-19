@@ -8,6 +8,8 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix # X11転送
       - $HOME/Android/Sdk:/opt/android-sdk
 
+    network_mode: "host"
+
 
     working_dir: /app
     privileged: true
@@ -37,5 +39,6 @@ services:
       - PATH="/usr/lib/ccache:$PATH"
       - CCACHE_MAXSIZE=30G
       - DISPLAY=${DISPLAY}
-    ports:
-      - "9090:9090"
+    # ports:
+    #   - "9090:9090"
+    network_mode: "host"
