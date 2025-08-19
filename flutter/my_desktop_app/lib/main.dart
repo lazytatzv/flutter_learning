@@ -48,7 +48,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void _connectToRos() async {
     try {
       // WSS でポート443に接続（Nginx経由）
-      final ws = await WebSocket.connect('wss://100.109.100.122/');
+      final ws = await WebSocket.connect('ws://100.109.100.122:9090');
       
       // /chatter トピックにサブスクライブ
       ws.add(jsonEncode({
