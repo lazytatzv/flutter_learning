@@ -6,12 +6,16 @@ services:
     volumes:
       - ./flutter:/app
       - /tmp/.X11-unix:/tmp/.X11-unix # X11転送
+      - $HOME/Android/Sdk:/opt/android-sdk
+
 
     working_dir: /app
+    privileged: true
     stdin_open: true
     tty: true
     environment:
       - DISPLAY=${DISPLAY}
+
     depends_on:
       - ros2
 
