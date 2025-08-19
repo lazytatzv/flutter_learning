@@ -23,9 +23,9 @@ services:
       context: ./ros2
       dockerfile: Dockerfile
     volumes:
-      - ./ros2:/ros_ws
+      - ./ros2:/root/ros_ws
       - /tmp/.X11-unix:/tmp/.X11-unix # X11転送
-    working_dir: /ros_ws
+    working_dir: /root/ros_ws
     tty: true
     privileged: true
     environment:
