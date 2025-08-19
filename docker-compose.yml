@@ -1,10 +1,10 @@
 services:
   flutter:
     build:
-      context: .
+      context: ./flutter
       dockerfile: Dockerfile
     volumes:
-      - ./src:/app
+      - ./flutter:/app
       - /tmp/.X11-unix:/tmp/.X11-unix # X11転送
 
     working_dir: /app
@@ -12,7 +12,26 @@ services:
     tty: true
     environment:
       - DISPLAY=${DISPLAY}
+    depends_on:
+      - ros2
 
 # X11転送をするとき以下をホスト側で実行
 # xhost +local:docker
 
+  ros2:
+    build:
+      context: ./ros2
+      dockerfile: Dockerfile
+    volumes:
+      - ./ros2:/ros_ws
+      - /tmp/.X11-unix:/tmp/.X11-unix # X11転送
+    working_dir: /ros_ws
+    tty: true
+    privileged: true
+    environment:
+      - CCACHE_DIR=/root/.ccache
+      - PATH="/usr/lib/ccache:$PATH"
+      - CCACHE_MAXSIZE=30G
+      - DISPLAY=${DISPLAY}
+    ports:
+      - "9090:9090"

@@ -2,10 +2,12 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+// Entry point
 void main() {
   runApp(const MyApp());
 }
 
+// Root widget class
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -62,13 +64,14 @@ class _MyHomePageState extends State<MyHomePage> {
   final FocusNode _focusNode = FocusNode();
   int _counter = 0;
   int _score = 0; // スコアを記憶
+
   // simple word list for the typing game
   final List<String> _wordList = [
     'apple', 'banana', 'cherry', 'dog', 'elephant', 'flutter', 'widget', 'state', 'async', 'future',
     'keyboard', 'monitor', 'window', 'linux', 'desktop', 'random', 'function', 'variable'
   ];
 
-  late String _targetWord; // 対象の単語
+  late String _targetWord; // 対象の単語 late->後で初期化
   String _currentInput = '';
 
   @override
