@@ -34,7 +34,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _connectToRos() async {
     try {
-      final ws = await WebSocket.conenct('ws://localhost:9090');
+      final ws = await WebSocket.connect('ws://ros2:9090');
       ws.add(jsonEncode({
         "op": "subscribe",
         "topic": "/chatter",
