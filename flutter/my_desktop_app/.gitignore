@@ -30,7 +30,7 @@ migrate_working_dir/
 .flutter-plugins-dependencies
 .pub-cache/
 .pub/
-!/build/web/
+# !/build/web/
 /coverage/
 
 # Symbolication related
