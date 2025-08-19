@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
   fzf \
   lsof \
   ccache \
+  ros-jazzy-rosbridge-server \
   && rm -rf /var/lib/apt/lists/*
 
 # RUN echo "tatzv ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
@@ -22,3 +23,6 @@ RUN echo "source /opt/ros/jazzy/setup.bash" >> /root/.bashrc
 WORKDIR /root/ros_ws
 
 CMD ["bash"]
+
+# rosbridge を起動
+#ros2 launch rosbridge_server rosbridge_websocket_launch.xml
