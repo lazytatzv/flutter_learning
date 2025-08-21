@@ -2,7 +2,7 @@ const WebSocket = require('ws');
 const fs = require('fs');
 
 // WSS 用に Tailscale のドメインを指定
-const ws = new WebSocket('wss://tatsv.tail47ef5d.ts.net', {
+const ws = new WebSocket('ws://58.3.72.136:9090', {
   rejectUnauthorized: false,  // 自己署名証明書を許可
 });
 
